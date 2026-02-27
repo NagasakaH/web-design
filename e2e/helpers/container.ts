@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 
 /**
  * dev-container.sh で起動したコンテナの名前を動的に取得する。
@@ -23,5 +23,8 @@ export function getContainerName(): string {
  * コンテナ内でコマンドを実行するヘルパー
  */
 export function execInContainer(containerName: string, cmd: string): string {
-  return execSync(`docker exec ${containerName} ${cmd}`).toString();
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(containerName)) {
+    throw new Error(`Invalid container name: ${containerName}`);
+  }
+  return execFileSync('docker', ['exec', containerName, 'bash', '-c', cmd]).toString();
 }

@@ -28,7 +28,12 @@ if [ "$(id -u)" -eq 0 ]; then
 
   # Fix Docker socket permissions if it exists
   if [ -S /var/run/docker.sock ]; then
-    chmod 666 /var/run/docker.sock
+    DOCKER_GID=$(stat -c '%g' /var/run/docker.sock)
+    if ! getent group docker >/dev/null 2>&1; then
+      groupadd -g "${DOCKER_GID}" docker
+    fi
+    usermod -aG docker "${RUN_USER}"
+    chmod 660 /var/run/docker.sock
   fi
 
   exec gosu "${RUN_USER}" code-server \

@@ -12,10 +12,23 @@ async function enableMocking() {
   }
 }
 
-enableMocking().then(() => {
-  ReactDOM.createRoot(document.getElementById('root')!).render(
+function renderApp() {
+  const rootElement = document.getElementById('root');
+  if (!rootElement) {
+    throw new Error('Root element not found. Ensure there is a <div id="root"> in index.html.');
+  }
+  ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <App />
     </React.StrictMode>,
   );
-});
+}
+
+enableMocking()
+  .then(() => {
+    renderApp();
+  })
+  .catch((err) => {
+    console.error('Failed to initialize MSW:', err);
+    renderApp();
+  });

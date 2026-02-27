@@ -3,7 +3,9 @@ import { test, expect } from '@playwright/test';
 test.describe('MSWモック応答確認', () => {
   test('E2E-9: /api/health がMSWモックレスポンスを返す', async ({ page }) => {
     await page.goto('http://localhost:5173');
-    await page.waitForTimeout(2000);
+    await page.waitForFunction(() => navigator.serviceWorker.controller !== null, {
+      timeout: 10_000,
+    });
 
     const response = await page.evaluate(async () => {
       const res = await fetch('/api/health');
@@ -15,7 +17,9 @@ test.describe('MSWモック応答確認', () => {
 
   test('E2E-10: MSW Service Workerが正常に登録されている', async ({ page }) => {
     await page.goto('http://localhost:5173');
-    await page.waitForTimeout(2000);
+    await page.waitForFunction(() => navigator.serviceWorker.controller !== null, {
+      timeout: 10_000,
+    });
 
     const swRegistered = await page.evaluate(async () => {
       const registrations = await navigator.serviceWorker.getRegistrations();
