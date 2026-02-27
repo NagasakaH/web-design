@@ -21,7 +21,10 @@ test.describe('DooD/DinD動作確認', () => {
     expect(infoOutput.trim()).toBeTruthy();
 
     // DinD固有: /var/run/docker.sock がホストと共有されていないことを確認
-    const sockCheck = execInContainer(containerName, 'test -S /var/run/docker.sock && echo exists || echo missing');
+    const sockCheck = execInContainer(
+      containerName,
+      'test -S /var/run/docker.sock && echo exists || echo missing',
+    );
     expect(sockCheck.trim()).toBe('exists');
   });
 
