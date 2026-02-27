@@ -13,9 +13,7 @@ export function getContainerName(): string {
 
   const containers = output.split('\n').filter(Boolean);
   if (containers.length === 0) {
-    throw new Error(
-      'No running container found with label managed-by=dev-container-sh',
-    );
+    throw new Error('No running container found with label managed-by=dev-container-sh');
   }
   const webDesign = containers.find((c) => c.startsWith('web-design-'));
   return webDesign || containers[0];

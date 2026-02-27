@@ -5,15 +5,15 @@ Web デザイン要件定義プロジェクト環境。
 
 ## 技術スタック
 
-| 技術 | バージョン / 説明 |
-|------|-------------------|
-| code-server | ブラウザベース VS Code |
+| 技術               | バージョン / 説明       |
+| ------------------ | ----------------------- |
+| code-server        | ブラウザベース VS Code  |
 | React + TypeScript | React 19 + TypeScript 5 |
-| Vite | 6（HMR 対応） |
-| Tailwind CSS | 4 |
-| MSW | 2（API モッキング） |
-| Playwright | E2E テスト |
-| Docker | DinD / DooD 対応 |
+| Vite               | 6（HMR 対応）           |
+| Tailwind CSS       | 4                       |
+| MSW                | 2（API モッキング）     |
+| Playwright         | E2E テスト              |
+| Docker             | DinD / DooD 対応        |
 
 ## 前提条件
 
@@ -44,16 +44,16 @@ DOCKER_MODE=dood ./scripts/dev-container.sh up
 
 ## npm スクリプト
 
-| コマンド | 説明 |
-|----------|------|
-| `npm run dev` | Vite 開発サーバー起動（HMR） |
-| `npm run build` | プロダクションビルド |
-| `npm run preview` | ビルド結果のプレビュー |
-| `npm run lint` | ESLint によるコード検査 |
-| `npm run format` | Prettier によるフォーマット |
+| コマンド               | 説明                          |
+| ---------------------- | ----------------------------- |
+| `npm run dev`          | Vite 開発サーバー起動（HMR）  |
+| `npm run build`        | プロダクションビルド          |
+| `npm run preview`      | ビルド結果のプレビュー        |
+| `npm run lint`         | ESLint によるコード検査       |
+| `npm run format`       | Prettier によるフォーマット   |
 | `npm run format:check` | フォーマットチェック（CI 用） |
-| `npm run test:e2e` | Playwright E2E テスト実行 |
-| `npm run test:e2e:ui` | Playwright UI モードで実行 |
+| `npm run test:e2e`     | Playwright E2E テスト実行     |
+| `npm run test:e2e:ui`  | Playwright UI モードで実行    |
 
 ## DooD/DinD モード切り替え
 

@@ -9,10 +9,7 @@ test.beforeAll(() => {
 
 test.describe('拡張機能・ツール確認', () => {
   test('E2E-3: 必要な拡張機能がインストールされている', async () => {
-    const output = execInContainer(
-      containerName,
-      'code-server --list-extensions',
-    );
+    const output = execInContainer(containerName, 'code-server --list-extensions');
 
     const requiredExtensions = [
       'dbaeumer.vscode-eslint',
@@ -44,10 +41,7 @@ test.describe('拡張機能・ツール確認', () => {
   });
 
   test('E2E-7: Copilot CLIが利用可能', async () => {
-    const output = execInContainer(
-      containerName,
-      'github-copilot-cli --version',
-    );
+    const output = execInContainer(containerName, 'github-copilot-cli --version');
     expect(output.trim()).not.toBe('');
   });
 });

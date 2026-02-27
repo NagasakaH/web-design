@@ -19,9 +19,7 @@ test.describe('MSWモック応答確認', () => {
 
     const swRegistered = await page.evaluate(async () => {
       const registrations = await navigator.serviceWorker.getRegistrations();
-      return registrations.some((r) =>
-        r.active?.scriptURL.includes('mockServiceWorker.js'),
-      );
+      return registrations.some((r) => r.active?.scriptURL.includes('mockServiceWorker.js'));
     });
     expect(swRegistered).toBe(true);
   });
