@@ -29,9 +29,12 @@ Web デザイン要件定義プロジェクト環境。
 
 # DooD モード
 DOCKER_MODE=dood ./scripts/dev-container.sh up
+
+# HTTPS モード（自己署名証明書を自動生成）
+CODE_SERVER_HTTPS=true ./scripts/dev-container.sh up
 ```
 
-- code-server: http://localhost:8080
+- code-server: http://localhost:8080 （HTTPS時: https://localhost:8080）
 - Vite dev server: http://localhost:5173
 
 ## 開発ワークフロー
@@ -69,6 +72,16 @@ DOCKER_MODE=dood ./scripts/dev-container.sh up
 # DooD モード
 DOCKER_MODE=dood ./scripts/dev-container.sh up
 ```
+
+## HTTPS モード
+
+環境変数 `CODE_SERVER_HTTPS=true` を設定すると、コンテナ起動時にコンテナIPベースの自己署名証明書を自動生成し、code-serverをHTTPSで起動します。
+
+```bash
+CODE_SERVER_HTTPS=true ./scripts/dev-container.sh up
+```
+
+証明書はコンテナ内の `~/.local/share/code-server/certs/` に保存されます。ブラウザでアクセスする際は自己署名証明書の警告を許可してください。
 
 ## プリビルトイメージのビルド
 

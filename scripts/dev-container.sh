@@ -11,6 +11,7 @@ DEV_CONTAINER_IMAGE="${DEV_CONTAINER_IMAGE:-nagasakah/web-design:latest}"
 DOCKER_MODE="${DOCKER_MODE:-dind}"
 CODE_SERVER_PORT="${CODE_SERVER_PORT:-8080}"
 VITE_PORT="${VITE_PORT:-5173}"
+CODE_SERVER_HTTPS="${CODE_SERVER_HTTPS:-false}"
 
 # Generate container name from workspace path hash
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -59,8 +60,12 @@ cmd_up() {
   check_docker
 
   if is_running; then
+    local protocol="http"
+    if [[ "${CODE_SERVER_HTTPS}" == "true" ]]; then
+      protocol="https"
+    fi
     echo "Container '${CONTAINER_NAME}' is already running."
-    echo "  Code Server: http://localhost:${CODE_SERVER_PORT}"
+    echo "  Code Server: ${protocol}://localhost:${CODE_SERVER_PORT}"
     echo "  Vite:        http://localhost:${VITE_PORT}"
     exit 0
   fi
@@ -79,6 +84,7 @@ cmd_up() {
       --label "managed-by=dev-container-sh" \
       --label "workspace-path=${WORKSPACE_DIR}" \
       --privileged \
+      -e "CODE_SERVER_HTTPS=${CODE_SERVER_HTTPS}" \
       -p "${CODE_SERVER_PORT}:8080" \
       -p "${VITE_PORT}:5173" \
       ${MOUNTS} \
@@ -90,6 +96,7 @@ cmd_up() {
       --label "workspace-path=${WORKSPACE_DIR}" \
       --privileged \
       --entrypoint start-code-server \
+      -e "CODE_SERVER_HTTPS=${CODE_SERVER_HTTPS}" \
       -p "${CODE_SERVER_PORT}:8080" \
       -p "${VITE_PORT}:5173" \
       -v /var/run/docker.sock:/var/run/docker.sock \
@@ -100,8 +107,13 @@ cmd_up() {
     exit 1
   fi
 
+  local protocol="http"
+  if [[ "${CODE_SERVER_HTTPS}" == "true" ]]; then
+    protocol="https"
+  fi
+
   echo "Container '${CONTAINER_NAME}' started."
-  echo "  Code Server: http://localhost:${CODE_SERVER_PORT}"
+  echo "  Code Server: ${protocol}://localhost:${CODE_SERVER_PORT}"
   echo "  Vite:        http://localhost:${VITE_PORT}"
 }
 
@@ -145,6 +157,7 @@ Environment Variables:
   DOCKER_MODE          Docker mode: dind or dood (default: dind)
   CODE_SERVER_PORT     Code Server port (default: 8080)
   VITE_PORT            Vite dev server port (default: 5173)
+  CODE_SERVER_HTTPS    Enable HTTPS with self-signed cert (default: false)
 
 Container: ${CONTAINER_NAME}
 Workspace: ${WORKSPACE_DIR}

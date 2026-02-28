@@ -4,9 +4,42 @@ set -euo pipefail
 WORKSPACE_DIR="${1:-/workspaces/web-design}"
 RUN_USER=vscode
 CODE_SERVER_PORT=8080
+CODE_SERVER_HTTPS="${CODE_SERVER_HTTPS:-false}"
+CERT_DIR="/home/${RUN_USER}/.local/share/code-server/certs"
 
 # WARNING: --auth none is for local development only.
 # Do NOT use this configuration in a publicly accessible environment.
+
+generate_self_signed_cert() {
+  mkdir -p "${CERT_DIR}"
+
+  # Collect all container IPs for SAN
+  local san_entries="DNS:localhost,IP:127.0.0.1"
+  local ips
+  ips=$(hostname -I 2>/dev/null || true)
+  for ip in ${ips}; do
+    san_entries="${san_entries},IP:${ip}"
+  done
+
+  openssl req -x509 -nodes -days 365 \
+    -newkey rsa:2048 \
+    -keyout "${CERT_DIR}/key.pem" \
+    -out "${CERT_DIR}/cert.pem" \
+    -subj "/CN=code-server-dev" \
+    -addext "subjectAltName=${san_entries}" \
+    2>/dev/null
+
+  chown -R "${RUN_USER}:${RUN_USER}" "${CERT_DIR}"
+  echo "Self-signed certificate generated for: ${san_entries}"
+}
+
+build_code_server_args() {
+  local args="--bind-addr 0.0.0.0:${CODE_SERVER_PORT} --auth none --disable-telemetry"
+  if [ "${CODE_SERVER_HTTPS}" = "true" ]; then
+    args="${args} --cert ${CERT_DIR}/cert.pem --cert-key ${CERT_DIR}/key.pem"
+  fi
+  echo "${args}"
+}
 
 if [ "$(id -u)" -eq 0 ]; then
   # Get workspace owner UID/GID
@@ -40,15 +73,20 @@ if [ "$(id -u)" -eq 0 ]; then
     chmod 660 /var/run/docker.sock
   fi
 
-  exec gosu "${RUN_USER}" code-server \
-    --bind-addr "0.0.0.0:${CODE_SERVER_PORT}" \
-    --auth none \
-    --disable-telemetry \
-    "${WORKSPACE_DIR}"
+  # Generate self-signed certificate if HTTPS is enabled
+  if [ "${CODE_SERVER_HTTPS}" = "true" ]; then
+    generate_self_signed_cert
+  fi
+
+  CS_ARGS=$(build_code_server_args)
+  # shellcheck disable=SC2086
+  exec gosu "${RUN_USER}" code-server ${CS_ARGS} "${WORKSPACE_DIR}"
 else
-  exec code-server \
-    --bind-addr "0.0.0.0:${CODE_SERVER_PORT}" \
-    --auth none \
-    --disable-telemetry \
-    "${WORKSPACE_DIR}"
+  if [ "${CODE_SERVER_HTTPS}" = "true" ]; then
+    generate_self_signed_cert
+  fi
+
+  CS_ARGS=$(build_code_server_args)
+  # shellcheck disable=SC2086
+  exec code-server ${CS_ARGS} "${WORKSPACE_DIR}"
 fi
