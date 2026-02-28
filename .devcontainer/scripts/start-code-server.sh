@@ -16,15 +16,19 @@ if [ "$(id -u)" -eq 0 ]; then
   CURRENT_UID=$(id -u "${RUN_USER}")
   CURRENT_GID=$(id -g "${RUN_USER}")
 
-  # Adjust UID/GID if different from workspace owner
-  if [ "${WS_GID}" != "${CURRENT_GID}" ]; then
-    groupmod -g "${WS_GID}" "${RUN_USER}"
+  # Adjust UID/GID if different from workspace owner (skip if root-owned)
+  if [ "${WS_GID}" != "0" ] && [ "${WS_GID}" != "${CURRENT_GID}" ]; then
+    if ! getent group "${WS_GID}" >/dev/null 2>&1; then
+      groupmod -g "${WS_GID}" "${RUN_USER}"
+    else
+      usermod -g "${WS_GID}" "${RUN_USER}"
+    fi
   fi
-  if [ "${WS_UID}" != "${CURRENT_UID}" ]; then
+  if [ "${WS_UID}" != "0" ] && [ "${WS_UID}" != "${CURRENT_UID}" ]; then
     usermod -u "${WS_UID}" "${RUN_USER}"
   fi
 
-  chown -R "${RUN_USER}:${RUN_USER}" "/home/${RUN_USER}"
+  chown -R "${RUN_USER}:${RUN_USER}" "/home/${RUN_USER}" 2>/dev/null || true
 
   # Fix Docker socket permissions if it exists
   if [ -S /var/run/docker.sock ]; then

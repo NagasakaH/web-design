@@ -1,17 +1,26 @@
 import { test, expect } from '@playwright/test';
 import { getContainerName, execInContainer } from './helpers/container';
 
-const DOCKER_MODE = process.env.DOCKER_MODE; // 'dind' | 'dood' | undefined
-
 let containerName: string;
+let detectedMode: 'dind' | 'dood' | undefined;
 
 test.beforeAll(() => {
   containerName = getContainerName();
+
+  // Auto-detect Docker mode from container if DOCKER_MODE env is not set
+  const envMode = process.env.DOCKER_MODE;
+  if (envMode === 'dind' || envMode === 'dood') {
+    detectedMode = envMode;
+  } else {
+    // Check if docker.sock is bind-mounted (DooD) or if dockerd runs inside (DinD)
+    const mountCheck = execInContainer(containerName, 'mount | grep docker.sock || true').trim();
+    detectedMode = mountCheck.includes('docker.sock') ? 'dood' : 'dind';
+  }
 });
 
 test.describe('DooD/DinD動作確認', () => {
   test('E2E-5: DinDモードでdocker psが実行できる', async () => {
-    test.skip(DOCKER_MODE === 'dood', 'DinDテストはDooDモードではスキップ');
+    test.skip(detectedMode === 'dood', 'DinDテストはDooDモードではスキップ');
 
     const output = execInContainer(containerName, 'docker ps');
     expect(output).toContain('CONTAINER ID');
@@ -29,7 +38,7 @@ test.describe('DooD/DinD動作確認', () => {
   });
 
   test('E2E-6: DooDモードでdocker psが実行できる', async () => {
-    test.skip(DOCKER_MODE === 'dind', 'DooDテストはDinDモードではスキップ');
+    test.skip(detectedMode === 'dind', 'DooDテストはDinDモードではスキップ');
 
     const output = execInContainer(containerName, 'docker ps');
     expect(output).toContain('CONTAINER ID');

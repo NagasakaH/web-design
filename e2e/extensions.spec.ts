@@ -41,7 +41,7 @@ test.describe('拡張機能・ツール確認', () => {
   });
 
   test('E2E-7: Copilot CLIが利用可能', async () => {
-    const output = execInContainer(containerName, 'github-copilot-cli --version');
+    const output = execInContainer(containerName, 'copilot --version');
     expect(output.trim()).not.toBe('');
   });
 });

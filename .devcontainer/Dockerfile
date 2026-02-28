@@ -1,8 +1,10 @@
-FROM --platform=linux/amd64 nagasakah/web-design:base
+FROM nagasakah/web-design:base
 
-# iptables修正（DinD対応）
+# iptables修正（DinD対応）+ gosuインストール
 RUN update-alternatives --set iptables /usr/sbin/iptables-nft && \
-    update-alternatives --set ip6tables /usr/sbin/ip6tables-nft
+    update-alternatives --set ip6tables /usr/sbin/ip6tables-nft && \
+    apt-get update && apt-get install -y --no-install-recommends gosu && \
+    rm -rf /var/lib/apt/lists/*
 
 # code-server インストール
 RUN curl -fsSL https://code-server.dev/install.sh | sh
